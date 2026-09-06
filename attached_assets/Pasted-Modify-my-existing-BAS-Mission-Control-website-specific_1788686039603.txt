@@ -1,0 +1,535 @@
+Modify my existing BAS Mission Control website, specifically the "Live Mission" page.
+
+DO NOT redesign the entire website. Keep the existing aerospace mission-control UI, navigation, typography, cards, colors, sidebar, header, and overall layout.
+
+I want the Live Mission page to become a REAL-TIME CAMERA + HUMAN ACTIVITY MONITORING DEMO instead of only a simulated camera visualization.
+
+CORE REQUIREMENT:
+The browser must request permission to access the user's webcam and display the live webcam feed in the main camera panel.
+
+==================================================
+1. REAL WEBCAM ACCESS
+==================================================
+
+Replace the current simulated camera visualization with an actual browser camera stream.
+
+Use:
+navigator.mediaDevices.getUserMedia({
+  video: {
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+    facingMode: "user"
+  },
+  audio: false
+})
+
+Requirements:
+- Ask for camera permission when the user clicks "START CAMERA" or "START SIMULATION".
+- Display the real-time webcam video inside the existing CAM-01 / SIMULATED SENSOR panel.
+- Maintain 16:9 aspect ratio.
+- Add proper loading state:
+  "REQUESTING CAMERA ACCESS..."
+- When camera starts:
+  status = "CAMERA LIVE"
+  show green live indicator
+  show FPS if available
+- If permission is denied:
+  show a professional error card:
+  "CAMERA ACCESS DENIED"
+  "Allow camera permission in your browser settings and try again."
+- If no camera exists:
+  show:
+  "NO CAMERA DETECTED"
+- Add a STOP CAMERA button.
+- Stop all MediaStream tracks when camera is stopped or component is unmounted.
+- Do not request camera permission automatically on page load. Ask only after user interaction.
+
+The browser must actually use the camera, not a fake video.
+
+==================================================
+2. REAL-TIME HUMAN POSE / MOVEMENT DETECTION
+==================================================
+
+Add browser-side human pose estimation.
+
+Preferred technology:
+MediaPipe Tasks Vision / Pose Landmarker
+or another lightweight browser-compatible pose estimation library.
+
+The system should detect:
+- human body presence
+- head
+- shoulders
+- elbows
+- wrists
+- hips
+- knees
+- ankles
+
+Draw the detected skeleton/landmarks over the live webcam video using a transparent canvas overlay.
+
+The camera panel should visually show:
+
+CAM-01 / LIVE SENSOR
+CAMERA LIVE
+24 FPS
+
+P-01 / CREW
+96.8%
+
+Pose skeleton
+Human bounding box
+
+The skeleton should update continuously as the person moves.
+
+Do NOT pretend that the system is using a trained astronaut HAR model if it is not.
+Clearly label the current implementation as:
+"EDGE AI DEMONSTRATION"
+or
+"POSE / ACTIVITY DEMO"
+
+==================================================
+3. ACTIVITY RECOGNITION
+==================================================
+
+Create a lightweight activity recognition layer based on the detected pose and movement.
+
+Detect/demo activities such as:
+
+- IDLE
+- STANDING
+- REACHING
+- BENDING
+- WALKING
+- PICKING OBJECT
+- PLACING OBJECT
+- HAND MOVEMENT
+- UNKNOWN
+
+Use temporal smoothing so the activity does not rapidly switch every frame.
+
+Show the detected activity in the existing right-side:
+CURRENT-ACTIVITY INTELLIGENCE
+
+Example:
+
+CURRENT ACTIVITY
+REACHING
+
+Confidence
+91.4%
+
+Motion state
+ACTIVE
+
+Human detected
+YES
+
+The confidence can be calculated from pose detection quality / movement heuristics.
+
+==================================================
+4. SEQUENCE INTELLIGENCE
+==================================================
+
+Keep the existing sequence-validation concept because this is the core SIH26174 innovation.
+
+Create a demo experiment sequence:
+
+1. PICK TOOL
+2. OPEN CONTAINER
+3. COLLECT SAMPLE
+4. PLACE SAMPLE
+5. ACTIVATE DEVICE
+6. COMPLETE
+
+Based on detected activity, update the current workflow step.
+
+For example:
+
+Expected:
+COLLECT SAMPLE
+
+Detected:
+REACHING / PICKING OBJECT
+
+Status:
+ALIGNED
+
+If the user enables DEMO ERROR MODE, deliberately simulate:
+
+COLLECT SAMPLE
+        ↓
+ACTIVATE DEVICE
+
+instead of:
+
+COLLECT SAMPLE
+        ↓
+PLACE SAMPLE
+
+Then display a strong but professional warning:
+
+SEQUENCE DEVIATION
+
+Expected:
+PLACE SAMPLE
+
+Detected:
+ACTIVATE DEVICE
+
+VOICE GUIDANCE:
+"Please place the sample before activating the device."
+
+Include:
+[ACKNOWLEDGE]
+[RETURN TO EXPECTED STEP]
+
+This is a demonstration of sequence validation, not a claim of actual astronaut experiment validation.
+
+==================================================
+5. CAMERA OVERLAYS
+==================================================
+
+On top of the real camera video, show useful mission-control overlays.
+
+Top-left:
+ZONE A / 01
+
+Top-right:
+EDGE AI ON
+
+Human overlay:
+P-01 / CREW
+96.8%
+
+Optional object overlays:
+TOOL
+POUCH
+TRAY
+
+Use bounding boxes only when there is actual detection.
+If object detection is not implemented, do not falsely claim that the system detected objects.
+
+Instead show:
+POSE DETECTION ACTIVE
+
+Bottom-left:
+ACTIVITY: REACHING
+
+Bottom-right:
+CONFIDENCE: 91.4%
+
+==================================================
+6. TELEMETRY BELOW CAMERA
+==================================================
+
+Very important:
+
+Immediately BELOW the main camera panel, create a "MISSION TELEMETRY" section.
+
+Use a professional grid of telemetry cards.
+
+Show:
+
+CABIN TEMPERATURE
+23.7 °C
+
+HUMIDITY
+48.2 %
+
+PRESSURE
+101.2 kPa
+
+CO2
+612 ppm
+
+O2
+20.8 %
+
+HEART RATE
+72 BPM
+
+CREW MOTION
+ACTIVE
+
+CAMERA FPS
+24 FPS
+
+AI LATENCY
+38 ms
+
+SYSTEM UPTIME
+02:18:42
+
+For this prototype, these values should be simulated and continuously updated with small realistic fluctuations.
+
+IMPORTANT:
+Clearly label the section:
+
+SIMULATED TELEMETRY
+
+Do NOT claim that temperature, humidity, pressure, CO2, O2 or heart rate are coming from the webcam.
+
+Add a small label:
+"Telemetry values are simulated for demonstration."
+
+Structure:
+
+LIVE CAMERA
+        ↓
+HUMAN ACTIVITY / POSE
+        ↓
+MISSION TELEMETRY
+        ↓
+SEQUENCE STATUS
+
+==================================================
+7. FUTURE REAL SENSOR SUPPORT
+==================================================
+
+Design the telemetry code so that simulated values can later be replaced by real sensor data.
+
+Create a clean telemetry interface such as:
+
+interface TelemetryData {
+  temperature: number;
+  humidity: number;
+  pressure: number;
+  co2: number;
+  oxygen: number;
+  heartRate: number;
+  cameraFps: number;
+  aiLatency: number;
+}
+
+Create:
+
+getSimulatedTelemetry()
+
+Keep this separate from the UI.
+
+Later it should be possible to replace it with:
+
+getRealTelemetry()
+
+from an ESP32 / Arduino / sensor API.
+
+Do not implement hardware communication unless necessary.
+
+==================================================
+8. CAMERA CONTROLS
+==================================================
+
+Keep the existing CAMERA CONTROLS card.
+
+Add:
+
+START CAMERA
+STOP CAMERA
+FLIP CAMERA
+FULLSCREEN
+
+Optional:
+ENABLE POSE
+DISABLE POSE
+
+When camera is running:
+
+● CAMERA LIVE
+24 FPS
+1280 × 720
+
+When stopped:
+
+● CAMERA STANDBY
+
+==================================================
+9. DEMO / SIMULATION MODE
+==================================================
+
+Keep the existing DEMO / SIMULATION badge.
+
+Add two modes:
+
+REAL CAMERA
+DEMO SIMULATION
+
+REAL CAMERA:
+- actual webcam
+- real pose detection
+- real-time movement
+- simulated telemetry
+
+DEMO SIMULATION:
+- existing simulated mission feed
+- simulated movement
+- simulated telemetry
+- sequence-error demonstration
+
+This lets us demonstrate the project even if the judge's laptop camera is unavailable.
+
+==================================================
+10. VOICE GUIDANCE
+==================================================
+
+Use the browser Web Speech API:
+
+window.speechSynthesis
+
+Create a voice guidance function.
+
+Example:
+
+speakGuidance(
+ "Please place the sample before activating the device."
+)
+
+Voice guidance should only play when:
+- a sequence error occurs
+- the user manually presses "VOICE GUIDANCE"
+
+Add a mute/unmute control.
+
+Do not repeatedly speak the same alert every frame.
+
+==================================================
+11. REAL-TIME PERFORMANCE
+==================================================
+
+Optimize the implementation.
+
+Do not run expensive React state updates on every camera frame.
+
+Use:
+- requestAnimationFrame
+- refs where appropriate
+- canvas overlay
+- throttled state updates
+
+Target:
+24–30 FPS camera display.
+
+Pose inference may run at a lower frequency if required for performance.
+
+Show:
+
+CAMERA FPS
+24
+
+AI LATENCY
+38 ms
+
+These should update dynamically.
+
+==================================================
+12. RESPONSIVE DESIGN
+==================================================
+
+Desktop:
+
+------------------------------------------------
+| LIVE CAMERA             | ACTIVITY INTELLIGENCE |
+|                         |                      |
+|                         |                      |
+------------------------------------------------
+
+| MISSION TELEMETRY                              |
+------------------------------------------------
+| TEMP | HUMIDITY | PRESSURE | CO2 | O2 | HR    |
+------------------------------------------------
+
+Tablet/mobile:
+stack these sections vertically.
+
+==================================================
+13. SAFETY / PRIVACY
+==================================================
+
+Do not upload webcam footage anywhere.
+
+The camera stream should remain inside the browser.
+
+Display a small status:
+
+LOCAL CAMERA PROCESSING
+
+No cloud upload.
+
+When camera is stopped, completely stop the MediaStream.
+
+==================================================
+14. UI TEXT
+==================================================
+
+Change:
+
+"Camera-to-decision demonstration surface. All perception overlays are simulated."
+
+to something more accurate:
+
+"Real-time crew observation with browser-side pose intelligence. Telemetry is simulated for demonstration."
+
+When using the actual webcam:
+
+"Camera-to-decision demonstration surface. Pose inference runs locally in the browser."
+
+==================================================
+15. SIH26174 PRESENTATION PURPOSE
+==================================================
+
+This website is a prototype demonstration for:
+
+SIH26174
+AI Human Activity Recognition for On-board BAS Experiments
+
+The important story should visually be:
+
+CAMERA
+   ↓
+HUMAN / POSE DETECTION
+   ↓
+ACTIVITY RECOGNITION
+   ↓
+TEMPORAL SEQUENCE VALIDATION
+   ↓
+VOICE GUIDANCE
+   ↓
+TIMESTAMPED MISSION LOG
+
+Make this visible somewhere in the Live Mission or Architecture page.
+
+==================================================
+16. IMPORTANT IMPLEMENTATION RULE
+==================================================
+
+Do not destroy or replace the existing UI.
+
+Modify the existing Live Mission page.
+
+Preserve:
+- sidebar
+- mission header
+- aerospace visual language
+- cards
+- colors
+- typography
+- navigation
+- existing pages
+
+Only upgrade the camera/AI/telemetry functionality.
+
+The final result should look like a serious aerospace mission-control prototype rather than a generic webcam application.
+
+After implementation, verify:
+1. Camera permission works.
+2. Real webcam appears.
+3. Camera can be stopped.
+4. Pose skeleton follows movement.
+5. Activity changes when the person moves.
+6. Telemetry updates continuously.
+7. Sequence status changes.
+8. Demo error mode produces a sequence deviation.
+9. Voice guidance works.
+10. No camera data is uploaded.
+11. Existing pages still work.
+12. npm run build succeeds.

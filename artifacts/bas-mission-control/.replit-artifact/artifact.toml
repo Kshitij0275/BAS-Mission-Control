@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "BAS Mission Control"
+description = "A responsive aerospace mission-control prototype for SIH 2026 that simulates AI-powered crew activity recognition, experiment sequence validation, alerts, analytics, and edge processing for on-board BAS experiments."
+version = "1.0.0"
+id = "artifacts/bas-mission-control"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23926
+
+[services.development]
+run = "pnpm --filter @workspace/bas-mission-control run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bas-mission-control", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/bas-mission-control/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23926"
+BASE_PATH = "/"
