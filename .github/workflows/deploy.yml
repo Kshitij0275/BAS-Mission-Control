@@ -38,8 +38,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build
-        run: pnpm run build
+      - name: Build BAS Mission Control
+        run: pnpm --filter @workspace/bas-mission-control build
+        env:
+          PORT: 4173
+          BASE_PATH: /BAS-Mission-Control/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -47,7 +50,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./artifacts/bas-mission-control/dist/public
 
   deploy:
     needs: build
